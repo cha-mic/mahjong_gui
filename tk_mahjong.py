@@ -148,7 +148,6 @@ def bottun_processing( type, num):
     for i in range(2):
         if( kaze_checkvar[i].get() == True ):
             place = kaze_canvas[i]
-            
             flag = 1
             break
 
