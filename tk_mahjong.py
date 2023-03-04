@@ -17,80 +17,23 @@ from PIL import ImageTk, Image
 # 手牌の枚数
 tehai_count = 0
 
-# 手牌の中のそれぞれの牌の枚数
-m_num = [0] * 10
-p_num = [0] * 10
-s_num = [0] * 10
-j_num = [0] * 10
+# 赤ドラの枚数
+aka_count = 0
 
-# 点数計算用
-def tehai_culc(m_num, p_num, s_num, j_num):
+# 結果計算用
+dora_indicators = []
+config = HandConfig(is_riichi=False, player_wind=NONE, round_wind=NONE)
 
-    fu  = 30 #翻
-    han = 0  #符
+# 手牌
+tiles_m = ""
+tiles_p = ""
+tiles_s = ""
+tiles_j = ""
 
-    # 役満判定
+# アガリ牌
+wintile = {}
 
-    ##　国士無双
-    kokusi = 1
-    for i in range(7):
-        kokusi = kokusi * j_num[i]
-
-    kokusi = kokusi * m_num[0] * m_num[8] * s_num[0] * s_num[8] * p_num[0] * p_num[8]
-    if(  kokusi == 2 ):
-            han = 13
-            return han, fu
-    
-    ## ちゅーれん
-    flag = 1
-    for i in range(8):
-        if( m_num[i] == 0 ):
-            flag = 0
-    if( flag == 1 ):
-        if( (m_num[0] >= 3) & (m_num[8] >= 3) ):
-            han = 13
-            return han, fu
-
-    flag = 1
-    for i in range(8):
-        if( p_num[i] == 0 ):
-            flag = 0
-    if( flag == 1 ):
-        if( (p_num[0] >= 3) & (p_num[8] >= 3) ):
-            han = 13
-            return han, fu 
-
-    flag = 1
-    for i in range(8):
-        if( s_num[i] == 0 ):
-            flag = 0
-    if( flag == 1 ):
-        if( (s_num[0] >= 3) & (s_num[8] >= 3) ):
-            han = 13
-            return han, fu   
-    
-    ## 大三元
-    if( (j_num[4] >= 3) &  (j_num[5] >= 3) & (j_num[6] >= 3)):
-        han = 13
-        return han, fu
-    
-    ## 大四喜
-    if( (j_num[0] >= 3) &  (j_num[1] >= 3) & (j_num[2] >= 3) & (j_num[3] >= 3)):
-        han = 13
-        return han, fu  
-     
-    ## 小四喜
-    if( (j_num[0] >= 2) &  (j_num[1] >= 2) & (j_num[2] >= 2) & (j_num[3] >= 2)):
-        han = 13
-        return han, fu  
-
-    
-
-    return han, fu
-
-def display_result( m_num, p_num, s_num, j_num ):
-
-    han, fu = tehai_culc(m_num, p_num, s_num, j_num)
+def display_result( result ):
 
     root2 = Tk()
     root2.title("result")
@@ -98,11 +41,42 @@ def display_result( m_num, p_num, s_num, j_num ):
     frame2 = ttk.Frame(root2, padding = 3)
     # label2 = ttk.Label(frame2, text= "役満")
 
-    if( han >= 13):
-        label2 = ttk.Label(frame2, text= "役満")
+    label_han = ttk.Label(frame2, text= str(result.han) + "翻" + str(result.fu) + "符")
     
     frame2.pack()
-    label2.pack(side = TOP)
+    label_han.pack( side = TOP )
+
+def culc_result():
+
+    global dora_indicators,config
+
+    global tiles_m, tiles_p, tiles_s, tiles_j
+    print(tiles_m)
+    print(tiles_p)
+    print(tiles_s)
+    print(tiles_j)
+    tiles = TilesConverter.string_to_136_array(man = tiles_m, pin = tiles_p, sou = tiles_s, honors = tiles_j)
+
+    global wintile
+    print(wintile)
+    if( ('m' in wintile) == True ):
+        win_tile = TilesConverter.string_to_136_array(man = str( wintile['m'] + 1 ) )[0] 
+    elif( ('p' in wintile) == True ):
+        win_tile = TilesConverter.string_to_136_array(pin = str( wintile['p'] + 1 ) )[0] 
+    elif( ('s' in wintile) == True ):
+        win_tile = TilesConverter.string_to_136_array(sou = str( wintile['s'] + 1 ) )[0]
+    elif( ('j' in wintile) == True ):
+        win_tile = TilesConverter.string_to_136_array(honors = str( wintile['j'] + 1 ) )[0]  
+
+    melds = []
+
+    calculator = HandCalculator()
+    result = calculator.estimate_hand_value(tiles, win_tile, melds, dora_indicators, config)
+
+    print(result)
+
+    display_result(result)
+
 
 # チェックボックスの状態を取得
 def check():
@@ -123,6 +97,9 @@ def check():
 
     if( tehai_check.get() == True ):
         check_state = check_state + 1
+
+    if( wintile_check.get() == True ):
+        check_state = check_state + 1
     
     return check_state
 
@@ -132,15 +109,13 @@ def bottun_processing( type, num):
 
     global tehai_count
     global img_m, img_p, img_s
-    global m_num, p_num, s_num, j_num
 
     wind = {0:EAST, 1:SOUTH, 2:WEST, 3:NORTH}
 
-    dora_indicators = []
-    config = HandConfig(is_riichi=False, player_wind=NONE, round_wind=NONE)
 
     if( check() != 1 ):
         print("error")
+        return 0
     
     flag = 0
 
@@ -184,6 +159,7 @@ def bottun_processing( type, num):
         
         return 1
 
+    # 裏ドラ（表示牌）の記録
     flag = 0
 
     for i in range(5):
@@ -209,53 +185,67 @@ def bottun_processing( type, num):
         return 1
 
 
+    # 手配の記録
+    flag = 0
 
-    if(1):
-        if( tehai_count < 13 ):
-            if( type == "m" ):
-                tehai_canvas.create_image(tehai_count * 40 + 4 , 4, image = img_m[num], anchor = NW)
-                m_num[num] = m_num[num] + 1
+    global tiles_m, tiles_p, tiles_s, tiles_j
+    global aka_count
+
+    if(tehai_check.get() == True):
+
+        # 赤の処理
+        if( num == 9 ):
+            aka_count = aka_count + 1
+            num = 4
+
+        if( type == "m" ):
+            tehai_canvas.create_image(tehai_count * 40 + 4 , 4, image = img_m[num], anchor = NW)
+            tiles_m = tiles_m + str(num + 1)
                 # print(m_num)
 
-            elif( type == "p" ):
-                tehai_canvas.create_image(tehai_count * 40 + 4 , 4, image = img_p[num], anchor = NW)
-                p_num[num] = p_num[num] + 1
+        elif( type == "p" ):
+            tehai_canvas.create_image(tehai_count * 40 + 4 , 4, image = img_p[num], anchor = NW)
+            tiles_p = tiles_p + str(num + 1)
 
-            elif( type == "s" ):
-                tehai_canvas.create_image(tehai_count * 40 + 4 , 4, image = img_s[num], anchor = NW)
-                s_num[num] = s_num[num] + 1
+        elif( type == "s" ):
+            tehai_canvas.create_image(tehai_count * 40 + 4 , 4, image = img_s[num], anchor = NW)
+            tiles_s = tiles_s + str(num + 1)
 
-            elif( type == "j" ):
-                tehai_canvas.create_image(tehai_count * 40 + 4 , 4, image = img_j[num], anchor = NW)
-                j_num[num] = j_num[num] + 1
+        elif( type == "j" ):
+            tehai_canvas.create_image(tehai_count * 40 + 4 , 4, image = img_j[num], anchor = NW)
+            tiles_j = tiles_j + str(num + 1)
+        flag = 1
+        tehai_count = tehai_count + 1
 
-        elif( tehai_count == 13 ):
-            if( type == "m" ):
-                tsumo_canvas.create_image(4, 4, image = img_m[num], anchor = NW)
-                m_num[num] = m_num[num] + 1
-                # print(m_num)
+        if( tehai_count >= 14 ):
+            culc_button["state"] = NORMAL
 
-            elif( type == "p" ):
-                tsumo_canvas.create_image(4, 4, image = img_p[num], anchor = NW)
-                p_num[num] = p_num[num] + 1
+        return 1
+    
+    # アガリ牌の記録
+    flag = 0
+    global wintile
 
-            elif( type == "s" ):
-                tsumo_canvas.create_image(4, 4, image = img_s[num], anchor = NW)
-                s_num[num] = s_num[num] + 1
-
-            elif( type == "j" ):
-                tsumo_canvas.create_image(4, 4, image = img_j[num], anchor = NW)
-                j_num[num] = j_num[num] + 1
+    if( wintile_check.get() == True ):
+        wintile = {type:num} # 辞書型で格納
+        flag = 1
+    
+    if( flag == 1 ):
+        if( type == 'm' ):
+            tsumo_canvas.create_image(4, 4, image = img_m[num], anchor = NW)
+        elif( type == 'p' ):
+            tsumo_canvas.create_image(4, 4, image = img_p[num], anchor = NW)
+        elif( type == 's' ):
+            tsumo_canvas.create_image(4, 4, image = img_s[num], anchor = NW)
+        elif( type == 'j'):
+            tsumo_canvas.create_image(4, 4, image = img_j[num], anchor = NW)
         
-        else:
-            print("can't display")
+        tehai_count = tehai_count + 1
 
-    tehai_count = tehai_count + 1
+        if( tehai_count >= 14 ):
+            culc_button["state"] = NORMAL
 
-    if( tehai_count == 14 ):
-        culc_button["state"] = NORMAL
-    elif( tehai_count > 14 ):
-        culc_button["state"] = DISABLED
+        return 1
 
 # 牌の入力ボタンの生成
 def make_inputbutton(row_input):
@@ -390,13 +380,47 @@ if __name__ == '__main__':
 
     # 入力ボタンの生成
     row_input = row_setting + 7
-    make_inputbutton( row_input )
+    # make_inputbutton( row_input )
+
+    # マンズの入力        
+    for mans in range(10):
+        ttk.Button(
+            frame1,
+            image = img_m[mans],
+            command = lambda num = mans: bottun_processing('m', num)
+        ).grid(row = row_input + 1, column = mans, padx = 0)
+
+    # ピンズの入力  
+    for pins in range(10):
+        ttk.Button(
+            frame1,
+            image = img_p[pins],
+            command = lambda num = pins: bottun_processing('p', num)
+        ).grid(row = row_input + 2, column = pins, padx = 0)
+
+    # ソウズの入力  
+    for sous in range(10):
+        ttk.Button(
+            frame1,
+            image = img_s[sous],
+            command = lambda num = sous: bottun_processing('s', num)
+        ).grid(row = row_input + 3, column = sous, padx = 0)
+    
+    # 字牌の入力        
+    for ji in range(7):
+        ttk.Button(
+            frame1,
+            image = img_j[ji],
+            command = lambda num = ji: bottun_processing('j', num)
+        ).grid(row = row_input + 4, column = ji, padx = 0)
+
+    # ここまで
 
     # 計算ボタンの配置
     culc_button = ttk.Button(
         frame1, 
         text = "計算", 
-        command = lambda : display_result(m_num, p_num, s_num, j_num),
+        command = lambda : culc_result(),
         state = DISABLED
         )
     culc_button.grid(row = row_input, column = tehai_canvas_width + 2)
@@ -405,6 +429,10 @@ if __name__ == '__main__':
     tehai_button = Checkbutton(frame1, text = "手牌", variable = tehai_check)
     tehai_button.grid(row = row_input - 1, column = 0, columnspan = tehai_canvas_width)
     tehai_canvas.grid(row = row_input, column = 0, columnspan = tehai_canvas_width)
+
+    wintile_check = BooleanVar(value = False)
+    wintile_bottun = Checkbutton( frame1, text = "アガリ牌", variable = wintile_check)
+    wintile_bottun.grid(row = row_input - 1, column = tehai_canvas_width + 1)
     tsumo_canvas.grid(row = row_input, column = tehai_canvas_width + 1)
 
     root.mainloop()
