@@ -49,26 +49,30 @@ def display_result( result ):
 def culc_result():
 
     global dora_indicators,config
+    # print(dora_indicators)
+    # print(config)
 
     global tiles_m, tiles_p, tiles_s, tiles_j
-    print(tiles_m)
-    print(tiles_p)
-    print(tiles_s)
-    print(tiles_j)
-    tiles = TilesConverter.string_to_136_array(man = tiles_m, pin = tiles_p, sou = tiles_s, honors = tiles_j)
-
     global wintile
+
     print(wintile)
+    
     if( ('m' in wintile) == True ):
+        tiles_m = tiles_m + str( wintile['m'] + 1 )
         win_tile = TilesConverter.string_to_136_array(man = str( wintile['m'] + 1 ) )[0] 
     elif( ('p' in wintile) == True ):
+        tiles_p = tiles_p + str( wintile['p'] + 1 )
         win_tile = TilesConverter.string_to_136_array(pin = str( wintile['p'] + 1 ) )[0] 
     elif( ('s' in wintile) == True ):
+        tiles_s = tiles_s + str( wintile['s'] + 1 )
         win_tile = TilesConverter.string_to_136_array(sou = str( wintile['s'] + 1 ) )[0]
     elif( ('j' in wintile) == True ):
+        tiles_j = tiles_j + str( wintile['j'] + 1 )
         win_tile = TilesConverter.string_to_136_array(honors = str( wintile['j'] + 1 ) )[0]  
+    
+    tiles = TilesConverter.string_to_136_array(man = tiles_m, pin = tiles_p, sou = tiles_s, honors = tiles_j)
 
-    melds = []
+    melds = None
 
     calculator = HandCalculator()
     result = calculator.estimate_hand_value(tiles, win_tile, melds, dora_indicators, config)
