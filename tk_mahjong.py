@@ -42,9 +42,11 @@ def display_result( result ):
     # label2 = ttk.Label(frame2, text= "役満")
 
     label_han = ttk.Label(frame2, text= str(result.han) + "翻" + str(result.fu) + "符")
+    label_cost = ttk.Label(frame2, text = str(result.cost['main']) + "-" + str(result.cost['additional']))
     
     frame2.pack()
     label_han.pack( side = TOP )
+    label_cost.pack( side = TOP)
 
 def culc_result():
 
@@ -52,7 +54,7 @@ def culc_result():
     # print(dora_indicators)
     # print(config)
 
-    global tiles_m, tiles_p, tiles_s, tiles_j
+    global tiles_m, tiles_p, tiles_s, tiles_j, aka_count
     global wintile
 
     print(wintile)
@@ -70,9 +72,9 @@ def culc_result():
         tiles_j = tiles_j + str( wintile['j'] + 1 )
         win_tile = TilesConverter.string_to_136_array(honors = str( wintile['j'] + 1 ) )[0]  
     
-    tiles = TilesConverter.string_to_136_array(man = tiles_m, pin = tiles_p, sou = tiles_s, honors = tiles_j)
+    tiles = TilesConverter.string_to_136_array(man = tiles_m, pin = tiles_p, sou = tiles_s, honors = tiles_j, has_aka_dora = aka_count)
 
-    melds = None
+    melds = []
 
     calculator = HandCalculator()
     result = calculator.estimate_hand_value(tiles, win_tile, melds, dora_indicators, config)
@@ -148,17 +150,27 @@ def bottun_processing( type, num):
             break  
 
     if( flag == 1 ):
+
         if( type == 'm' ):
             place.create_image(4, 4, image = img_m[num], anchor = NW)
-            dora_indicators.append( TilesConverter.string_to_136_array(man = str(num + 1))[0] )
         elif( type == 'p' ):
             place.create_image(4, 4, image = img_p[num], anchor = NW)
-            dora_indicators.append( TilesConverter.string_to_136_array(pin = str(num + 1))[0] )
         elif( type == 's' ):
             place.create_image(4, 4, image = img_s[num], anchor = NW)
-            dora_indicators.append( TilesConverter.string_to_136_array(sou = str(num + 1))[0] )
         elif( type == 'j'):
             place.create_image(4, 4, image = img_j[num], anchor = NW)
+
+        # 赤の処理
+        if( num == 9 ):
+            num = 4
+
+        if( type == 'm' ):
+            dora_indicators.append( TilesConverter.string_to_136_array(man = str(num + 1))[0] )
+        elif( type == 'p' ):
+            dora_indicators.append( TilesConverter.string_to_136_array(pin = str(num + 1))[0] )
+        elif( type == 's' ):
+            dora_indicators.append( TilesConverter.string_to_136_array(sou = str(num + 1))[0] )
+        elif( type == 'j'):
             dora_indicators.append( TilesConverter.string_to_136_array(honors = str(num + 1))[0] )
         
         return 1
@@ -173,17 +185,26 @@ def bottun_processing( type, num):
             break   
     
     if( flag == 1 ):
+
         if( type == 'm' ):
             place.create_image(4, 4, image = img_m[num], anchor = NW)
-            dora_indicators.append( TilesConverter.string_to_136_array(man = str(num + 1))[0] )
         elif( type == 'p' ):
             place.create_image(4, 4, image = img_p[num], anchor = NW)
-            dora_indicators.append( TilesConverter.string_to_136_array(pin = str(num + 1))[0] )
         elif( type == 's' ):
             place.create_image(4, 4, image = img_s[num], anchor = NW)
-            dora_indicators.append( TilesConverter.string_to_136_array(sou = str(num + 1))[0] )
         elif( type == 'j'):
             place.create_image(4, 4, image = img_j[num], anchor = NW)
+
+        if( num == 9 ):
+            num = 4
+
+        if( type == 'm' ):
+            dora_indicators.append( TilesConverter.string_to_136_array(man = str(num + 1))[0] )
+        elif( type == 'p' ):
+            dora_indicators.append( TilesConverter.string_to_136_array(pin = str(num + 1))[0] )
+        elif( type == 's' ):
+            dora_indicators.append( TilesConverter.string_to_136_array(sou = str(num + 1))[0] )
+        elif( type == 'j'):
             dora_indicators.append( TilesConverter.string_to_136_array(honors = str(num + 1))[0] )
         
         return 1
@@ -197,27 +218,29 @@ def bottun_processing( type, num):
 
     if(tehai_check.get() == True):
 
+        if( type == "m" ):
+            tehai_canvas.create_image(tehai_count * 40 + 4 , 4, image = img_m[num], anchor = NW)
+        elif( type == "p" ):
+            tehai_canvas.create_image(tehai_count * 40 + 4 , 4, image = img_p[num], anchor = NW)
+        elif( type == "s" ):
+            tehai_canvas.create_image(tehai_count * 40 + 4 , 4, image = img_s[num], anchor = NW)
+        elif( type == "j" ):
+            tehai_canvas.create_image(tehai_count * 40 + 4 , 4, image = img_j[num], anchor = NW)
+
         # 赤の処理
         if( num == 9 ):
             aka_count = aka_count + 1
             num = 4
 
         if( type == "m" ):
-            tehai_canvas.create_image(tehai_count * 40 + 4 , 4, image = img_m[num], anchor = NW)
             tiles_m = tiles_m + str(num + 1)
-                # print(m_num)
-
         elif( type == "p" ):
-            tehai_canvas.create_image(tehai_count * 40 + 4 , 4, image = img_p[num], anchor = NW)
             tiles_p = tiles_p + str(num + 1)
-
         elif( type == "s" ):
-            tehai_canvas.create_image(tehai_count * 40 + 4 , 4, image = img_s[num], anchor = NW)
             tiles_s = tiles_s + str(num + 1)
-
         elif( type == "j" ):
-            tehai_canvas.create_image(tehai_count * 40 + 4 , 4, image = img_j[num], anchor = NW)
             tiles_j = tiles_j + str(num + 1)
+
         flag = 1
         tehai_count = tehai_count + 1
 
@@ -231,7 +254,6 @@ def bottun_processing( type, num):
     global wintile
 
     if( wintile_check.get() == True ):
-        wintile = {type:num} # 辞書型で格納
         flag = 1
     
     if( flag == 1 ):
@@ -243,7 +265,15 @@ def bottun_processing( type, num):
             tsumo_canvas.create_image(4, 4, image = img_s[num], anchor = NW)
         elif( type == 'j'):
             tsumo_canvas.create_image(4, 4, image = img_j[num], anchor = NW)
-        
+
+        # 赤の処理
+        if( num == 9 ):
+            aka_count = aka_count + 1
+            num = 4
+ 
+        # 辞書型で格納
+        wintile = {type:num}    
+
         tehai_count = tehai_count + 1
 
         if( tehai_count >= 14 ):
@@ -384,41 +414,7 @@ if __name__ == '__main__':
 
     # 入力ボタンの生成
     row_input = row_setting + 7
-    # make_inputbutton( row_input )
-
-    # マンズの入力        
-    for mans in range(10):
-        ttk.Button(
-            frame1,
-            image = img_m[mans],
-            command = lambda num = mans: bottun_processing('m', num)
-        ).grid(row = row_input + 1, column = mans, padx = 0)
-
-    # ピンズの入力  
-    for pins in range(10):
-        ttk.Button(
-            frame1,
-            image = img_p[pins],
-            command = lambda num = pins: bottun_processing('p', num)
-        ).grid(row = row_input + 2, column = pins, padx = 0)
-
-    # ソウズの入力  
-    for sous in range(10):
-        ttk.Button(
-            frame1,
-            image = img_s[sous],
-            command = lambda num = sous: bottun_processing('s', num)
-        ).grid(row = row_input + 3, column = sous, padx = 0)
-    
-    # 字牌の入力        
-    for ji in range(7):
-        ttk.Button(
-            frame1,
-            image = img_j[ji],
-            command = lambda num = ji: bottun_processing('j', num)
-        ).grid(row = row_input + 4, column = ji, padx = 0)
-
-    # ここまで
+    make_inputbutton( row_input )
 
     # 計算ボタンの配置
     culc_button = ttk.Button(
