@@ -18,11 +18,11 @@ from PIL import ImageTk, Image
 tehai_count = 0
 
 # 赤ドラの枚数
-aka_count = 0
+aka_count = True
 
 # 結果計算用
 dora_indicators = []
-config = HandConfig(is_riichi=False, player_wind=NONE, round_wind=NONE)
+config = HandConfig(is_riichi=False, player_wind=NONE, round_wind=NONE, options=OptionalRules(has_open_tanyao=True, has_aka_dora=True))
 
 # 手牌
 tiles_m = ""
@@ -60,17 +60,22 @@ def culc_result():
     print(wintile)
     
     if( ('m' in wintile) == True ):
-        tiles_m = tiles_m + str( wintile['m'] + 1 )
-        win_tile = TilesConverter.string_to_136_array(man = str( wintile['m'] + 1 ) )[0] 
+        tiles_m = tiles_m + str( wintile['m'] )
+        win_tile = TilesConverter.string_to_136_array(man = str( wintile['m'] ) )[0] 
     elif( ('p' in wintile) == True ):
-        tiles_p = tiles_p + str( wintile['p'] + 1 )
-        win_tile = TilesConverter.string_to_136_array(pin = str( wintile['p'] + 1 ) )[0] 
+        tiles_p = tiles_p + str( wintile['p'] )
+        win_tile = TilesConverter.string_to_136_array(pin = str( wintile['p'] ) )[0] 
     elif( ('s' in wintile) == True ):
-        tiles_s = tiles_s + str( wintile['s'] + 1 )
-        win_tile = TilesConverter.string_to_136_array(sou = str( wintile['s'] + 1 ) )[0]
+        tiles_s = tiles_s + str( wintile['s'] )
+        win_tile = TilesConverter.string_to_136_array(sou = str( wintile['s'] ) )[0]
     elif( ('j' in wintile) == True ):
         tiles_j = tiles_j + str( wintile['j'] + 1 )
-        win_tile = TilesConverter.string_to_136_array(honors = str( wintile['j'] + 1 ) )[0]  
+        win_tile = TilesConverter.string_to_136_array(honors = str( wintile['j']  + 1) )[0]  
+
+    print(tiles_m)
+    print(tiles_p)
+    print(tiles_s)
+    print(tiles_j)
     
     tiles = TilesConverter.string_to_136_array(man = tiles_m, pin = tiles_p, sou = tiles_s, honors = tiles_j, has_aka_dora = aka_count)
 
@@ -160,18 +165,14 @@ def bottun_processing( type, num):
         elif( type == 'j'):
             place.create_image(4, 4, image = img_j[num], anchor = NW)
 
-        # 赤の処理
-        if( num == 9 ):
-            num = 4
-
         if( type == 'm' ):
-            dora_indicators.append( TilesConverter.string_to_136_array(man = str(num + 1))[0] )
+            dora_indicators.append( TilesConverter.string_to_136_array(man = str(num))[0] )
         elif( type == 'p' ):
-            dora_indicators.append( TilesConverter.string_to_136_array(pin = str(num + 1))[0] )
+            dora_indicators.append( TilesConverter.string_to_136_array(pin = str(num))[0] )
         elif( type == 's' ):
-            dora_indicators.append( TilesConverter.string_to_136_array(sou = str(num + 1))[0] )
+            dora_indicators.append( TilesConverter.string_to_136_array(sou = str(num))[0] )
         elif( type == 'j'):
-            dora_indicators.append( TilesConverter.string_to_136_array(honors = str(num + 1))[0] )
+            dora_indicators.append( TilesConverter.string_to_136_array(honors = str(num) + 1 )[0] )
         
         return 1
 
@@ -195,17 +196,14 @@ def bottun_processing( type, num):
         elif( type == 'j'):
             place.create_image(4, 4, image = img_j[num], anchor = NW)
 
-        if( num == 9 ):
-            num = 4
-
         if( type == 'm' ):
-            dora_indicators.append( TilesConverter.string_to_136_array(man = str(num + 1))[0] )
+            dora_indicators.append( TilesConverter.string_to_136_array(man = str(num))[0] )
         elif( type == 'p' ):
-            dora_indicators.append( TilesConverter.string_to_136_array(pin = str(num + 1))[0] )
+            dora_indicators.append( TilesConverter.string_to_136_array(pin = str(num))[0] )
         elif( type == 's' ):
-            dora_indicators.append( TilesConverter.string_to_136_array(sou = str(num + 1))[0] )
+            dora_indicators.append( TilesConverter.string_to_136_array(sou = str(num))[0] )
         elif( type == 'j'):
-            dora_indicators.append( TilesConverter.string_to_136_array(honors = str(num + 1))[0] )
+            dora_indicators.append( TilesConverter.string_to_136_array(honors = str(num) + 1 )[0] )
         
         return 1
 
@@ -218,28 +216,23 @@ def bottun_processing( type, num):
 
     if(tehai_check.get() == True):
 
+        # 赤の処理
+        # if( num == 0 ):
+        #     aka_count = True
+
         if( type == "m" ):
             tehai_canvas.create_image(tehai_count * 40 + 4 , 4, image = img_m[num], anchor = NW)
+            tiles_m = tiles_m + str(num)
         elif( type == "p" ):
             tehai_canvas.create_image(tehai_count * 40 + 4 , 4, image = img_p[num], anchor = NW)
+            tiles_p = tiles_p + str(num)
         elif( type == "s" ):
             tehai_canvas.create_image(tehai_count * 40 + 4 , 4, image = img_s[num], anchor = NW)
+            tiles_s = tiles_s + str(num)
         elif( type == "j" ):
             tehai_canvas.create_image(tehai_count * 40 + 4 , 4, image = img_j[num], anchor = NW)
-
-        # 赤の処理
-        if( num == 9 ):
-            aka_count = aka_count + 1
-            num = 4
-
-        if( type == "m" ):
-            tiles_m = tiles_m + str(num + 1)
-        elif( type == "p" ):
-            tiles_p = tiles_p + str(num + 1)
-        elif( type == "s" ):
-            tiles_s = tiles_s + str(num + 1)
-        elif( type == "j" ):
             tiles_j = tiles_j + str(num + 1)
+
 
         flag = 1
         tehai_count = tehai_count + 1
@@ -267,12 +260,11 @@ def bottun_processing( type, num):
             tsumo_canvas.create_image(4, 4, image = img_j[num], anchor = NW)
 
         # 赤の処理
-        if( num == 9 ):
-            aka_count = aka_count + 1
-            num = 4
+        # if( num == 0 ):
+        #     aka_count = True
  
         # 辞書型で格納
-        wintile = {type:num}    
+        wintile = {type : num}    
 
         tehai_count = tehai_count + 1
 
@@ -327,19 +319,19 @@ if __name__ == '__main__':
 
     # 画像の読み込み
     img_m = []
+    img_m.append(ImageTk.PhotoImage(Image.open('./img/_5m_aka.png')))
     for mans in range(9):
         img_m.append(ImageTk.PhotoImage(Image.open('./img/_'+ str(mans + 1) +'m.png')))
-    img_m.append(ImageTk.PhotoImage(Image.open('./img/_5m_aka.png')))
 
     img_p = []
+    img_p.append(ImageTk.PhotoImage(Image.open('./img/_5p_aka.png')))
     for pins in range(9):
         img_p.append(ImageTk.PhotoImage(Image.open('./img/_'+ str(pins + 1) +'p.png')))
-    img_p.append(ImageTk.PhotoImage(Image.open('./img/_5p_aka.png')))
 
     img_s = []
+    img_s.append(ImageTk.PhotoImage(Image.open('./img/_5s_aka.png')))
     for sous in range(9):
         img_s.append(ImageTk.PhotoImage(Image.open('./img/_'+ str(sous + 1) +'s.png')))
-    img_s.append(ImageTk.PhotoImage(Image.open('./img/_5s_aka.png')))
 
     img_j = []
     for ji in range(7):
