@@ -41,17 +41,15 @@ def display_result( result ):
     root2 = Tk()
     root2.title("result")
 
-    frame2 = ttk.Frame(root2, padding = 3)
-    # label2 = ttk.Label(frame2, text= "役満")
-
-    label_han = ttk.Label(frame2, text= str(result.han) + "翻" + str(result.fu) + "符")
-    label_cost = ttk.Label(frame2, text = str(result.cost['main']) + "-" + str(result.cost['additional']))
-    label_yaku = ttk.Label(frame2, text = str( result.yaku ))
-    
+    frame2 = ttk.Frame(root2, padding = 10)
     frame2.pack()
-    label_han.pack( side = TOP )
-    label_cost.pack( side = TOP)
-    label_yaku.pack( side = TOP)
+
+    if( result.yaku == None ):
+        ttk.Label(frame2, text = "役なし", font=( "Helvetica", 14, "bold")).pack( side = TOP )
+    else:
+        ttk.Label(frame2, text= str(result.han) + "翻" + str(result.fu) + "符", font=( "Helvetica", 10, "bold")).pack( side = TOP )
+        ttk.Label(frame2, text = str(result.cost['main']) + "-" + str(result.cost['additional']), font=( "Helvetica", 10, "bold")).pack( side = TOP )
+        ttk.Label(frame2, text = str( result.yaku ), font=( "Helvetica", 10, "bold")).pack( side = TOP )
 
 # 点数計算
 def culc_result():
@@ -67,16 +65,16 @@ def culc_result():
     
     if( ('m' in wintile) == True ):
         tiles_m = tiles_m + str( wintile['m'] )
-        win_tile = TilesConverter.string_to_136_array(man = str( wintile['m'] ) )[0] 
+        win_tile = TilesConverter.string_to_136_array(man = str( wintile['m'] ))[0] 
     elif( ('p' in wintile) == True ):
         tiles_p = tiles_p + str( wintile['p'] )
-        win_tile = TilesConverter.string_to_136_array(pin = str( wintile['p'] ) )[0] 
+        win_tile = TilesConverter.string_to_136_array(pin = str( wintile['p'] ))[0] 
     elif( ('s' in wintile) == True ):
         tiles_s = tiles_s + str( wintile['s'] )
-        win_tile = TilesConverter.string_to_136_array(sou = str( wintile['s'] ) )[0]
+        win_tile = TilesConverter.string_to_136_array(sou = str( wintile['s'] ))[0]
     elif( ('j' in wintile) == True ):
         tiles_j = tiles_j + str( wintile['j'] + 1 )
-        win_tile = TilesConverter.string_to_136_array(honors = str( wintile['j']  + 1) )[0]  
+        win_tile = TilesConverter.string_to_136_array(honors = str( wintile['j']  + 1 ))[0]  
 
     print(tiles_m)
     print(tiles_p)
@@ -130,7 +128,6 @@ def bottun_processing( type, num):
     global img_m, img_p, img_s
 
     wind = {0:EAST, 1:SOUTH, 2:WEST, 3:NORTH}
-
 
     if( check() != 1 ):
         print("error")
@@ -309,6 +306,34 @@ def make_inputbutton(row_input):
 
     # ここまで
 
+# 手牌のリセット
+def reset_hand():
+
+    global tiles_m, tiles_p, tiles_s, tiles_j, wintile
+    global tehai_count, aka_count
+
+    # 手牌
+    tiles_m = ""
+    tiles_p = ""
+    tiles_s = ""
+    tiles_j = ""
+    tehai_count = 0
+    aka_count = 0
+
+    # アガリ牌
+    wintile = {}
+
+    # 設定のリセット
+    config.is_riichi = False
+    config.is_tsumo = False
+    config.is_daburu_riichi = False
+    config.is_ippatsu = False
+
+    # GUIのリセット
+    tehai_canvas.delete("all")
+    tsumo_canvas.delete("all")
+    culc_button['state'] = False
+
 # オプションの設定
 def set_option(option):
     global config
@@ -424,10 +449,6 @@ if __name__ == '__main__':
 
     # ここまで
 
-    # 入力ボタンの生成
-    row_input = row_setting + 8
-    make_inputbutton( row_input )
-
     # 計算ボタンの配置
     culc_button = ttk.Button(
         frame1, 
@@ -471,7 +492,15 @@ if __name__ == '__main__':
         text = "一発",
         command = lambda : set_option('ippatu'),
         ).grid(row = row_setting + 6, column = 6, columnspan = 2)
+
+    # 入力ボタンの生成
+    row_input = row_setting + 8
+    make_inputbutton( row_input )
+
+    reset_button_1 = ttk.Button(
+        frame1,
+        text = "手牌reset",
+        command = lambda : reset_hand(),
+        ).grid(row = row_input + 5, column = 0, columnspan = 2)
     
-
-
     root.mainloop()
