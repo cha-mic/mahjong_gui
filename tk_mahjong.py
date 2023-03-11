@@ -20,11 +20,11 @@ from PIL import ImageTk, Image
 tehai_count = 0
 
 # 赤ドラの枚数
-aka_count = True
+aka_count = False
 
 # 結果計算用
 dora_indicators = []
-config = HandConfig(is_riichi=False, player_wind=NONE, round_wind=NONE, options=OptionalRules(has_open_tanyao=True, has_aka_dora=True))
+config = HandConfig(is_riichi=False, player_wind=NONE, round_wind=NONE, options=OptionalRules(has_open_tanyao = True, has_aka_dora = aka_count))
 
 # 手牌
 tiles_m = ""
@@ -46,10 +46,12 @@ def display_result( result ):
 
     label_han = ttk.Label(frame2, text= str(result.han) + "翻" + str(result.fu) + "符")
     label_cost = ttk.Label(frame2, text = str(result.cost['main']) + "-" + str(result.cost['additional']))
+    label_yaku = ttk.Label(frame2, text = str( result.yaku ))
     
     frame2.pack()
     label_han.pack( side = TOP )
     label_cost.pack( side = TOP)
+    label_yaku.pack( side = TOP)
 
 # 点数計算
 def culc_result():
@@ -83,11 +85,15 @@ def culc_result():
     
     tiles = TilesConverter.string_to_136_array(man = tiles_m, pin = tiles_p, sou = tiles_s, honors = tiles_j, has_aka_dora = aka_count)
 
+    if( aka_count == True ):
+        config.options.has_aka_dora = True
+
     melds = []
 
     calculator = HandCalculator()
     result = calculator.estimate_hand_value(tiles, win_tile, melds, dora_indicators, config)
 
+    print(result.yaku)
     print(result)
 
     display_result(result)
@@ -224,7 +230,9 @@ def bottun_processing( type, num):
         elif( type == "j" ):
             tehai_canvas.create_image(tehai_count * 40 + 4 , 4, image = img_j[num], anchor = NW)
             tiles_j = tiles_j + str(num + 1)
-
+        
+        if( num == 0 ):
+            aka_count = True
 
         flag = 1
         tehai_count = tehai_count + 1
@@ -251,6 +259,9 @@ def bottun_processing( type, num):
         elif( type == 'j'):
             tsumo_canvas.create_image(4, 4, image = img_j[num], anchor = NW)
  
+        if( num == 0 ):
+            aka_count = True
+
         # 辞書型で格納
         wintile = {type : num}    
 
@@ -298,6 +309,18 @@ def make_inputbutton(row_input):
 
     # ここまで
 
+# オプションの設定
+def set_option(option):
+    global config
+
+    if( option == 'riichi' ):
+        config.is_riichi = True
+    elif( option == 'tsumo' ):
+        config.is_tsumo = True
+    elif( option == 'daburii' ):
+        config.is_daburu_riichi == True
+    elif( option == 'ippatu' ):
+        config.is_ippatsu == True
 
 if __name__ == '__main__':
 
@@ -402,7 +425,7 @@ if __name__ == '__main__':
     # ここまで
 
     # 入力ボタンの生成
-    row_input = row_setting + 7
+    row_input = row_setting + 8
     make_inputbutton( row_input )
 
     # 計算ボタンの配置
@@ -412,16 +435,43 @@ if __name__ == '__main__':
         command = lambda : culc_result(),
         state = DISABLED
         )
-    culc_button.grid(row = row_input, column = tehai_canvas_width + 2)
+    culc_button.grid(row = row_setting + 5, column = tehai_canvas_width + 2)
 
     tehai_check = BooleanVar(value = False)
     tehai_button = Checkbutton(frame1, text = "手牌", variable = tehai_check)
-    tehai_button.grid(row = row_input - 1, column = 0, columnspan = tehai_canvas_width)
-    tehai_canvas.grid(row = row_input, column = 0, columnspan = tehai_canvas_width)
+    tehai_button.grid(row = row_setting + 4, column = 0, columnspan = tehai_canvas_width)
+    tehai_canvas.grid(row = row_setting + 5, column = 0, columnspan = tehai_canvas_width)
 
     wintile_check = BooleanVar(value = False)
     wintile_bottun = Checkbutton( frame1, text = "アガリ牌", variable = wintile_check)
-    wintile_bottun.grid(row = row_input - 1, column = tehai_canvas_width + 1)
-    tsumo_canvas.grid(row = row_input, column = tehai_canvas_width + 1)
+    wintile_bottun.grid(row = row_setting + 4, column = tehai_canvas_width + 1)
+    tsumo_canvas.grid(row = row_setting + 5, column = tehai_canvas_width + 1)
+
+    # オプションを決定するボタン
+    option_button_1 = ttk.Button(
+        frame1,
+        text = "立直",
+        command = lambda : set_option('riichi'),
+        ).grid(row = row_setting + 6, column = 0, columnspan = 2)
+    
+    option_button_2 = ttk.Button(
+        frame1,
+        text = "ダブル立直",
+        command = lambda : set_option('daburii'),
+        ).grid(row = row_setting + 6, column = 2, columnspan = 2)
+
+    option_button_3 = ttk.Button(
+        frame1,
+        text = "ツモ",
+        command = lambda : set_option('tsumo'),
+        ).grid(row = row_setting + 6, column = 4, columnspan = 2)
+
+    option_button_3 = ttk.Button(
+        frame1,
+        text = "一発",
+        command = lambda : set_option('ippatu'),
+        ).grid(row = row_setting + 6, column = 6, columnspan = 2)
+    
+
 
     root.mainloop()
