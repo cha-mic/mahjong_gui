@@ -1,18 +1,20 @@
-#計算
+# 計算
 from mahjong.hand_calculating.hand import HandCalculator
-#麻雀牌
+# 麻雀牌
 from mahjong.tile import TilesConverter
-#役, オプションルール
+# 役, オプションルール
 from mahjong.hand_calculating.hand_config import HandConfig, OptionalRules
-#鳴き
+# 鳴き
 from mahjong.meld import Meld
-#風(場&自)
+# 風(場&自)
 from mahjong.constants import EAST, SOUTH, WEST, NORTH
 
+# tkinter
 from tkinter import *
 from tkinter import ttk
-from PIL import ImageTk, Image
 
+# 画像の取り込み用
+from PIL import ImageTk, Image
 
 # 手牌の枚数
 tehai_count = 0
@@ -33,6 +35,7 @@ tiles_j = ""
 # アガリ牌
 wintile = {}
 
+# 結果の表示
 def display_result( result ):
 
     root2 = Tk()
@@ -48,6 +51,7 @@ def display_result( result ):
     label_han.pack( side = TOP )
     label_cost.pack( side = TOP)
 
+# 点数計算
 def culc_result():
 
     global dora_indicators,config
@@ -88,7 +92,6 @@ def culc_result():
 
     display_result(result)
 
-
 # チェックボックスの状態を取得
 def check():
 
@@ -113,7 +116,6 @@ def check():
         check_state = check_state + 1
     
     return check_state
-
 
 # 牌が押された時の処理
 def bottun_processing( type, num):
@@ -189,24 +191,18 @@ def bottun_processing( type, num):
 
         if( type == 'm' ):
             place.create_image(4, 4, image = img_m[num], anchor = NW)
-        elif( type == 'p' ):
-            place.create_image(4, 4, image = img_p[num], anchor = NW)
-        elif( type == 's' ):
-            place.create_image(4, 4, image = img_s[num], anchor = NW)
-        elif( type == 'j'):
-            place.create_image(4, 4, image = img_j[num], anchor = NW)
-
-        if( type == 'm' ):
             dora_indicators.append( TilesConverter.string_to_136_array(man = str(num))[0] )
         elif( type == 'p' ):
+            place.create_image(4, 4, image = img_p[num], anchor = NW)
             dora_indicators.append( TilesConverter.string_to_136_array(pin = str(num))[0] )
         elif( type == 's' ):
+            place.create_image(4, 4, image = img_s[num], anchor = NW)
             dora_indicators.append( TilesConverter.string_to_136_array(sou = str(num))[0] )
         elif( type == 'j'):
+            place.create_image(4, 4, image = img_j[num], anchor = NW)
             dora_indicators.append( TilesConverter.string_to_136_array(honors = str(num) + 1 )[0] )
         
         return 1
-
 
     # 手配の記録
     flag = 0
@@ -215,10 +211,6 @@ def bottun_processing( type, num):
     global aka_count
 
     if(tehai_check.get() == True):
-
-        # 赤の処理
-        # if( num == 0 ):
-        #     aka_count = True
 
         if( type == "m" ):
             tehai_canvas.create_image(tehai_count * 40 + 4 , 4, image = img_m[num], anchor = NW)
@@ -258,10 +250,6 @@ def bottun_processing( type, num):
             tsumo_canvas.create_image(4, 4, image = img_s[num], anchor = NW)
         elif( type == 'j'):
             tsumo_canvas.create_image(4, 4, image = img_j[num], anchor = NW)
-
-        # 赤の処理
-        # if( num == 0 ):
-        #     aka_count = True
  
         # 辞書型で格納
         wintile = {type : num}    
@@ -311,7 +299,6 @@ def make_inputbutton(row_input):
     # ここまで
 
 
-
 if __name__ == '__main__':
 
     root = Tk()
@@ -342,13 +329,24 @@ if __name__ == '__main__':
     tehai_canvas_width = 17
     tehai_canvas = Canvas(frame1, bg = "green", width = 40 * tehai_canvas_width , height = 48)
     tsumo_canvas = Canvas(frame1, bg = "green", width = 40,                       height = 48)
-    label1 = ttk.Label(frame1, text = '牌をクリックして入力')
+    label1 = ttk.Label(frame1, text = '牌の入力', font=( "Helvetica" ,14 ,"bold"))
+
+    config_label_1 = ttk.Label(
+        frame1,
+        text = '入力方法：チェックボックスにチェック　→　牌をクリック （入力したい場所のみにチェック）',
+        font=( "Helvetica" ,10))
+    config_label_2 = ttk.Label(
+        frame1, 
+        text = 'ドラ，裏ドラ：表示牌を入力',
+        font=( "Helvetica" ,10))
 
     frame1.grid(row = 0, column = 0)
-    label1.grid(row = 0, column = 0, columnspan = tehai_canvas_width)
+    label1.grid(row = 0, column = 0, columnspan = tehai_canvas_width + 2)
+    config_label_1.grid(row = 1, column = 0, columnspan = tehai_canvas_width + 2)
+    config_label_2.grid(row = 2, column = 0, columnspan = tehai_canvas_width + 2)
 
     # 風牌の入力場所
-    row_setting = 3
+    row_setting = 5
     column_setting = 0
 
     kaze_button = []
@@ -402,7 +400,6 @@ if __name__ == '__main__':
         uradora_canvas[i].grid(row = row_setting + 3, column = i * 2, columnspan = 2)
 
     # ここまで
-
 
     # 入力ボタンの生成
     row_input = row_setting + 7
