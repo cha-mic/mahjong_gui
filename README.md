@@ -1,4 +1,4 @@
-# majong_gui
+# mahjong_gui
 GUI for mahjong
 
 ## 目的
