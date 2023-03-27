@@ -39,7 +39,7 @@ wintile = {}
 def display_result( result ):
 
     root2 = Tk()
-    root2.title("result")
+    root2.title("Result")
 
     frame2 = ttk.Frame(root2, padding = 10)
     frame2.pack()
@@ -207,7 +207,7 @@ def bottun_processing( type, num):
         
         return 1
 
-    # 手配の記録
+    # 手牌の記録
     flag = 0
 
     global tiles_m, tiles_p, tiles_s, tiles_j
@@ -234,7 +234,7 @@ def bottun_processing( type, num):
         flag = 1
         tehai_count = tehai_count + 1
 
-        if( tehai_count >= 14 ):
+        if( tehai_count >= 13 ):
             culc_button["state"] = NORMAL
 
         return 1
@@ -245,27 +245,37 @@ def bottun_processing( type, num):
 
     if( wintile_check.get() == True ):
         flag = 1
-    
+
     if( flag == 1 ):
+
         if( type == 'm' ):
-            tsumo_canvas.create_image(4, 4, image = img_m[num], anchor = NW)
+            agari_canvas.create_image(4, 4, image = img_m[num], anchor = NW)
         elif( type == 'p' ):
-            tsumo_canvas.create_image(4, 4, image = img_p[num], anchor = NW)
+            agari_canvas.create_image(4, 4, image = img_p[num], anchor = NW)
         elif( type == 's' ):
-            tsumo_canvas.create_image(4, 4, image = img_s[num], anchor = NW)
+            agari_canvas.create_image(4, 4, image = img_s[num], anchor = NW)
         elif( type == 'j'):
-            tsumo_canvas.create_image(4, 4, image = img_j[num], anchor = NW)
+            agari_canvas.create_image(4, 4, image = img_j[num], anchor = NW)
+        print(wintile)
+        if( ('m' in wintile) == True ):
+            tiles_m = tiles_m.replace(str( wintile['m'] ),'')
+        elif( ('p' in wintile) == True ):
+            tiles_p = tiles_p.replace(str( wintile['p'] ),'')
+        elif( ('s' in wintile) == True ):
+            tiles_s = tiles_s.replace(str( wintile['s'] ),'')
+        elif( ('j' in wintile) == True ):
+            tiles_j = tiles_j.replace(str( wintile['j'] ),'')
  
         if( num == 0 ):
-            aka_count = True
-
+            aka_count = True   
+        
         # 辞書型で格納
-        wintile = {type : num}    
+        wintile = {type : num}
 
-        tehai_count = tehai_count + 1
+        # tehai_count = tehai_count + 1
 
-        if( tehai_count >= 14 ):
-            culc_button["state"] = NORMAL
+        # if( tehai_count >= 14 ):
+        #     culc_button["state"] = NORMAL
 
         return 1
 
@@ -331,7 +341,7 @@ def reset_hand():
 
     # GUIのリセット
     tehai_canvas.delete("all")
-    tsumo_canvas.delete("all")
+    agari_canvas.delete("all")
     culc_button['state'] = False
 
 # オプションの設定
@@ -376,7 +386,7 @@ if __name__ == '__main__':
     frame1 = ttk.Frame(root, padding = 16)
     tehai_canvas_width = 17
     tehai_canvas = Canvas(frame1, bg = "green", width = 40 * tehai_canvas_width , height = 48)
-    tsumo_canvas = Canvas(frame1, bg = "green", width = 40,                       height = 48)
+    agari_canvas = Canvas(frame1, bg = "green", width = 40,                       height = 48)
     label1 = ttk.Label(frame1, text = '牌の入力', font=( "Helvetica" ,14 ,"bold"))
 
     config_label_1 = ttk.Label(
@@ -457,6 +467,7 @@ if __name__ == '__main__':
         state = DISABLED
         )
     culc_button.grid(row = row_setting + 5, column = tehai_canvas_width + 2)
+    # ここまで
 
     tehai_check = BooleanVar(value = False)
     tehai_button = Checkbutton(frame1, text = "手牌", variable = tehai_check)
@@ -466,7 +477,7 @@ if __name__ == '__main__':
     wintile_check = BooleanVar(value = False)
     wintile_bottun = Checkbutton( frame1, text = "アガリ牌", variable = wintile_check)
     wintile_bottun.grid(row = row_setting + 4, column = tehai_canvas_width + 1)
-    tsumo_canvas.grid(row = row_setting + 5, column = tehai_canvas_width + 1)
+    agari_canvas.grid(row = row_setting + 5, column = tehai_canvas_width + 1)
 
     # オプションを決定するボタン
     option_button_1 = ttk.Button(
@@ -497,6 +508,7 @@ if __name__ == '__main__':
     row_input = row_setting + 8
     make_inputbutton( row_input )
 
+    # リセットボタンの作成
     reset_button_1 = ttk.Button(
         frame1,
         text = "手牌reset",
